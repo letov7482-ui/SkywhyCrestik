@@ -28,12 +28,14 @@ public partial class SettingsManager : Node
 
     private void ApplyBaseMobileOptimization()
     {
-        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAWithSubpixel.Disabled;
+        // ФИКС: Правильный синтаксис отключения сглаживания для Godot 4
+        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAntiAliasing.Disabled;
     }
 
     public void CheckDevicePerformance()
     {
-        float realFPS = Engine.GetFramesPerSecond();
+        // ФИКС: Принудительно конвертируем double в float через (float)
+        float realFPS = (float)Engine.GetFramesPerSecond();
         
         if (realFPS < 25 && currentFPS > 30)
         {
@@ -45,7 +47,7 @@ public partial class SettingsManager : Node
 
     public void ForceLowGraphics()
     {
-        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAWithSubpixel.Disabled;
+        GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAntiAliasing.Disabled;
         GD.Print("Устройство нагрелось. Включены низкие настройки.");
     }
 
@@ -53,11 +55,12 @@ public partial class SettingsManager : Node
     {
         if (isOverheating && level > 1) return; 
 
+        // ФИКС: Настройка мобильного сглаживания без ПК-эффектов под Godot 4
         switch(level)
         {
-            case 0: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAWithSubpixel.Disabled; break; 
-            case 1: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAWithSubpixel.Fxaa; break;     
-            case 2: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAAWithSubpixel.Max; break;      
+            case 0: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAntiAliasing.Disabled; break; 
+            case 1: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAntiAliasing.Fxaa; break;     
+            case 2: GetViewport().ScreenSpaceAA = Viewport.ScreenSpaceAntiAliasing.Fxaa; break; // Для мобилок FXAA - потолок безопасности     
         }
     }
 
