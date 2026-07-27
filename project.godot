@@ -1,0 +1,20 @@
+config_version=5
+
+[application]
+config/name="SkyWhy"
+config/tags=PackedStringArray("midpoint", "horror")
+run/main_scene="res://scenes/MainMenu.tscn"
+config/features=PackedStringArray("4.2", "Forward+")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/handheld/orientation="sensor_landscape"
+
+[physics]
+3d/default_gravity=9.8
+
+[rendering]
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
