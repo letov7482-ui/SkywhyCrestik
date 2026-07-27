@@ -24,37 +24,31 @@ func _hide_all() -> void:
 	settings_menu.hide()
 	case_shop.hide()
 
-# Настройки кадров (FPS) для Redmi Note 12
 func set_fps_mode(index: int) -> void:
 	match index:
-		0: current_fps_limit = 60 # Плавный режим
-		1: current_fps_limit = 45 # Стабильный сбалансированный режим
+		0: current_fps_limit = 60
+		1: current_fps_limit = 45
 		2: current_fps_limit = 30
 	_apply_performance_settings()
 
 func _apply_performance_settings() -> void:
-	Engine.max_fps = current_fps_limit # Встроенная оптимизация Godot под мобильные чипы
+	Engine.max_fps = current_fps_limit
 
-# Смена скина на Женский от Midpoint
 func change_character_gender(gender_name: String) -> void:
 	player_gender = gender_name
-	print("Midpoint: Выбран скин -> ", player_gender)
 
-# Рулетка открытия кейсов в стиле PUBG / Free Fire
 func buy_midpoint_case() -> void:
 	if coins < 100:
-		print("Недостаточно монет для прокрутки кейса!")
 		return
 		
 	coins -= 100
 	var drop_chance = randi() % 100
-	
 	if drop_chance < 15:
-		print("🏆 ЭПИК! Выбит редкий женский скин персонажа!")
+		print("Выбит редкий женский скин")
 	elif drop_chance < 45:
-		print("📦 РЕДКОЕ! Выбит кастомный темный плащ Midpoint")
+		print("Выбит плащ Midpoint")
 	else:
-		print("🔋 ОБЫЧНОЕ! Получены запасные батарейки для фонарика")
+		print("Выпали батарейки")
 
 func launch_game_match() -> void:
 	get_tree().change_scene_to_file("res://scenes/World.tscn")
