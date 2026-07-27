@@ -23,19 +23,19 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # Фикс ссылок скачивания через официальные зеркала TuxFamily (без редиректов GitHub)
+      # Качаем шаблоны напрямую из официального GitHub Godot с обходом защиты
       - name: Download Godot Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          curl -L -o templates.tpz https://tuxfamily.org
-          unzip templates.tpz -d /tmp
+          curl -L -o templates.zip https://github.com
+          unzip templates.zip -d /tmp
           mv /tmp/templates/* ~/.local/share/godot/export_templates/4.3.stable/
-          rm templates.tpz
+          rm templates.zip
 
-      # Качаем сам движок через зеркало TuxFamily
+      # Качаем сам движок Godot 4.3 .NET (Headless Linux)
       - name: Setup Godot Engine
         run: |
-          curl -L -o godot.zip https://tuxfamily.org
+          curl -L -o godot.zip https://github.com
           unzip godot.zip
           mv Godot_v4.3-stable_linux_headless.x86_64 /usr/local/bin/godot
           chmod +x /usr/local/bin/godot
