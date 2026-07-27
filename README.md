@@ -1,27 +1,45 @@
-🎮 SKYWHY
-Версия проекта: v0.0.1 Alpha
-Движок: Godot 4
-Платформа: Android
-Сборка: GitHub Actions
-FPS по умолчанию: 60
-Ориентация: Landscape (горизонтальная)
-🎯 План на День 1
-Мы не пишем сразу тысячи строк кода.
-Мы сначала создаём ядро проекта.
-Сегодня
-✅ Название проекта
-✅ Структура
-✅ Архитектура
-✅ README
-✅ GitHub
-📋 А теперь первое официальное решение проекта
-Кодовое имя
-Project SKYWHY
-Версия
-0.0.1 Alpha
-Девиз
-Fear doesn't chase you.
+# SKYWHY
 
-It waits.
-Перевод:
-Страх не гонится за тобой. Он ждёт.
+> Fear doesn't chase you. It waits.
+
+## 🎮 About
+
+SKYWHY is a modern psychological horror game for Android.
+
+The game is being developed using Godot 4 and GitHub Actions.
+
+Current Version:
+v0.0.1 Alpha
+
+Platform:
+Android
+
+Target FPS:
+60 FPS
+
+Orientation:
+Landscape
+
+Engine:
+Godot 4
+
+---
+
+## Project Goals
+
+- Modern graphics
+- Smooth gameplay
+- Smart AI
+- Atmospheric horror
+- No cheap jumpscares
+- Multiplayer in future
+
+---
+
+## Development Status
+
+🟢 Project Started
+
+---
+
+Made with ❤️
