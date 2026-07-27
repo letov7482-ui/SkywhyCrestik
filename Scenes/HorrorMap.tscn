@@ -1,6 +1,8 @@
-[gd_scene load_steps=4 format=3 id=4]
+[gd_scene load_steps=5 format=3 id=4]
 
 [ext_resource type="Script" path="res://Scripts/HorrorMapController.cs" id="1_map"]
+[ext_resource type="PackedScene" path="res://Scenes/Monster.tscn" id="2_monster"]
+[ext_resource type="PackedScene" path="res://Scenes/UI_TouchControls.tscn" id="3_ui"]
 
 [sub_environment id="Environment_horror"]
 background_mode = 1
@@ -16,11 +18,25 @@ script = ExtResource("1_map")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubEnvironment("Environment_horror")
 
-[node name="Player" type="Node3D" parent="."]
+[node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_mask = 1
+script = ExtResource("1_player")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 current = true
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Player/Camera3D"]
+spot_range = 15.0
+spot_angle = 35.0
+shadow_enabled = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="Monster" parent="." instance=ExtResource("2_monster")]
+
+[node name="UI" parent="." instance=ExtResource("3_ui")]
 
 [node name="GlobalLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.86, 0, -0.86, 0.5, 0, 10, 0)
