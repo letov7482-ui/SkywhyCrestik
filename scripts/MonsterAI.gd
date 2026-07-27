@@ -13,10 +13,9 @@ var player: CharacterBody3D = null
 var target_pos: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
-	# Ищем игрока по группе сцены
 	var players = get_tree().get_nodes_in_group("Player")
 	if players.size() > 0:
-		player = players[0]
+		player = players
 	_choose_new_patrol_point()
 
 func _physics_process(delta: float) -> void:
@@ -27,7 +26,6 @@ func _physics_process(delta: float) -> void:
 		var distance = global_position.distance_to(player.global_position)
 		_handle_states(distance)
 
-	# Рассчитываем путь движения в обход стен
 	if not nav_agent.is_navigation_finished():
 		var next_pos = nav_agent.get_next_path_position()
 		var dir = (next_pos - global_position).normalized()
@@ -36,7 +34,6 @@ func _physics_process(delta: float) -> void:
 		velocity.x = dir.x * target_speed
 		velocity.z = dir.z * target_speed
 		
-		# Плавный разворот лица монстра в сторону шагов
 		if Vector2(velocity.x, velocity.z).length() > 0.1:
 			var look_angle = atan2(-velocity.x, -velocity.z)
 			rotation.y = rotate_toward(rotation.y, look_angle, delta * 5.0)
@@ -48,15 +45,15 @@ func _handle_states(distance: float) -> void:
 		State.PATROL:
 			nav_agent.target_position = target_pos
 			if distance < 15.0:
-				current_state = State.OBSERVE # Заметил игрока, начинает слежку
+				current_state = State.OBSERVE
 				
 		State.OBSERVE:
 			look_at(Vector3(player.global_position.x, global_position.y, player.global_position.z), Vector3.UP)
 			if distance < 8.0:
-				current_state = State.HUNT # Слишком близко! Включается атака
+				current_state = State.HUNT
 				
 		State.HUNT:
-			nav_agent.target_position = player.global_position # Бежит за игроком
+			nav_agent.target_position = player.global_position
 			if distance < 1.5:
 				_kill_player()
 
@@ -68,5 +65,4 @@ func _on_state_timer_timeout() -> void:
 		_choose_new_patrol_point()
 
 func _kill_player() -> void:
-	# Нападение монстра и перезагрузка матча SkyWhy
 	get_tree().reload_current_scene()
