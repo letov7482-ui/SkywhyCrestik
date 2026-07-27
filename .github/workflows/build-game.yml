@@ -23,21 +23,23 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Download and Setup Godot 4
-      uses: chickenandpork/setup-godot@v1
+      # ИСПРАВЛЕНО: Используем официальный актуальный репозиторий компилятора
+      uses: chickensoft-games/setup-godot@v2
       with:
         version: "4.2.2"
+        include-templates: true
 
     - name: Export Android APK
       run: |
         mkdir -p build/android
-        # Компиляция папок Godot в установочный пакет Android
+        # headles-сборка игры по экспортным пресетам
         godot --headless --export-release "Android" build/android/SkyWhy_Midpoint.apk
       continue-on-error: true
 
-    - name: Create Temporary Zip Pack If Full SDK Init
+    - name: Create Temporary Zip Pack If Full APK Setup Pending
       run: |
         if [ ! -f build/android/SkyWhy_Midpoint.apk ]; then
-          echo "Packaging game files directly."
+          echo "Full Android SDK Build pending config. Packaging game scripts architecture instead."
           zip -r build/android/SkyWhy_Scripts_Project.zip . -x "*.git*"
         fi
 
