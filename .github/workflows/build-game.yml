@@ -1,0 +1,38 @@
+name: Build and Package SkyWhy Game
+
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-node-version: 20
+        cache: 'npm'
+
+    - name: Install game production dependencies
+      run: npm install
+
+    - name: Compile game via Vite production build
+      run: npm run build
+
+    - name: Compress build directory into Game ZIP Archive
+      run: |
+        cd dist
+        zip -r ../SkyWhy_Build.zip .
+
+    - name: Upload Finished ZIP Artifact to GitHub Dashboard
+      uses: actions/upload-artifact@v4
+      with:
+        name: SkyWhy_Mobile_Release
+        path: SkyWhy_Build.zip
+        retention-days: 7
+        
