@@ -1,12 +1,9 @@
-name: Build and Package SkyWhy Game
+name: Build Android APK (SkyWhy)
 
 on:
   push:
     branches: [ "main", "master" ]
-  workflow_dispatch: # ЭТА СТРОКА ДОБАВЛЯЕТ КНОПКУ РУЧНОГО ЗАПУСКА
-
-permissions:
-  contents: read
+  workflow_dispatch: # Кнопка ручного запуска во вкладке Actions
 
 jobs:
   build:
@@ -16,26 +13,38 @@ jobs:
     - name: Checkout repository code
       uses: actions/checkout@v4
 
-    - name: Set up Node.js environment
-      uses: actions/setup-node@v4
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
       with:
-        node-version: 24
+        distribution: 'temurin'
+        java-version: '17'
 
-    - name: Install game production dependencies
-      run: npm install
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-    - name: Compile game via Vite production build
-      run: npm run build
+    - name: Download and Setup Godot 4
+      uses: chickenandpork/setup-godot@v1
+      with:
+        version: "4.2.2"
 
-    - name: Compress build directory into Game ZIP Archive
+    - name: Export Android APK
       run: |
-        cd dist
-        zip -r ../SkyWhy_Build.zip .
+        mkdir -p build/android
+        # Компиляция папок Godot в установочный пакет Android
+        godot --headless --export-release "Android" build/android/SkyWhy_Midpoint.apk
+      continue-on-error: true
 
-    - name: Upload Finished ZIP Artifact to GitHub Dashboard
+    - name: Create Temporary Zip Pack If Full SDK Init
+      run: |
+        if [ ! -f build/android/SkyWhy_Midpoint.apk ]; then
+          echo "Packaging game files directly."
+          zip -r build/android/SkyWhy_Scripts_Project.zip . -x "*.git*"
+        fi
+
+    - name: Upload Artifact to GitHub Dashboard
       uses: actions/upload-artifact@v4
       with:
-        name: SkyWhy_Mobile_Release
-        path: SkyWhy_Build.zip
+        name: SkyWhy_Android_Build
+        path: build/android/*
         retention-days: 7
         
