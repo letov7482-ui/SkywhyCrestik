@@ -2,34 +2,64 @@ name: "Build skywhy crestik"
 
 on:
   push:
-    branches: [ "main" ] # Сборка запускается автоматически при каждом пуше в ветку main
-  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой на сайте GitHub
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   export-android:
     name: Android Export
     runs-on: ubuntu-latest
     
-    # Использование готового Docker-контейнера с предустановленным движком Godot 4.3.0 stable и .NET (C#)
-    container:
-      image: barichello/godot-ci:4.3
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Configure Export Templates
+      # Качаем официальные шаблоны экспорта Godot 4.3 напрямую из репозитория
+      - name: Download Godot Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          cp -r /root/.local/share/godot/templates/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+          wget https://github.com
+          unzip Godot_v4.3-stable_export_templates.tpz -d /tmp
+          mv /tmp/templates/* ~/.local/share/godot/export_templates/4.3.stable/
+          rm Godot_v4.3-stable_export_templates.tpz
+
+      # Устанавливаем сам headless-движок Godot 4.3 в систему виртуальной машины
+      - name: Setup Godot Engine
+        run: |
+          wget https://github.com
+          unzip Godot_v4.3-stable_linux_headless.x86_64.zip
+          mv Godot_v4.3-stable_linux_headless.x86_64 /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          rm Godot_v4.3-stable_linux_headless.x86_64.zip
+
+      # Прописываем редактору внутренние пути до Android SDK, чтобы он не ругался
+      - name: Configure Godot Editor Settings for Android
+        run: |
+          mkdir -p ~/.config/godot
+          echo "[settings]" > ~/.config/godot/editor_settings-4.tres
+          echo "export/android/android_sdk_path = \"$ANDROID_HOME\"" >> ~/.config/godot/editor_settings-4.tres
+          echo "export/android/shutdown_adb_on_exit = true" >> ~/.config/godot/editor_settings-4.tres
+
+      # Фикс ошибки пустого или битого файла иконки res://icon.svg
+      - name: Generate Dummy Icon
+        run: |
+          if [ ! -f icon.svg ]; then
+            echo '<svg xmlns="http://w3.org" width="128" height="128"><rect width="128" height="128" fill="#ff0000"/></svg>' > icon.svg
+          fi
 
       - name: Build Android APK
         run: |
           mkdir -p build/android
-          # Сборка в headless-режиме (без графического интерфейса на сервере)
+          # Передаем переменные SDK прямо в команду сборки
           godot --headless --export-debug "Android" build/android/skywhy_crestik.apk
 
       - name: Upload Finished APK
@@ -37,5 +67,5 @@ jobs:
         with:
           name: skywhy-crestik-apk
           path: build/android/skywhy_crestik.apk
-          retention-days: 7 # Файл будет храниться на GitHub 7 дней
+          retention-days: 7
           
