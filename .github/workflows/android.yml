@@ -23,25 +23,24 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # Качаем официальные шаблоны экспорта Godot 4.3 напрямую из репозитория
+      # Фикс ссылок скачивания через официальные зеркала TuxFamily (без редиректов GitHub)
       - name: Download Godot Export Templates
         run: |
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          wget https://github.com
-          unzip Godot_v4.3-stable_export_templates.tpz -d /tmp
+          curl -L -o templates.tpz https://tuxfamily.org
+          unzip templates.tpz -d /tmp
           mv /tmp/templates/* ~/.local/share/godot/export_templates/4.3.stable/
-          rm Godot_v4.3-stable_export_templates.tpz
+          rm templates.tpz
 
-      # Устанавливаем сам headless-движок Godot 4.3 в систему виртуальной машины
+      # Качаем сам движок через зеркало TuxFamily
       - name: Setup Godot Engine
         run: |
-          wget https://github.com
-          unzip Godot_v4.3-stable_linux_headless.x86_64.zip
+          curl -L -o godot.zip https://tuxfamily.org
+          unzip godot.zip
           mv Godot_v4.3-stable_linux_headless.x86_64 /usr/local/bin/godot
           chmod +x /usr/local/bin/godot
-          rm Godot_v4.3-stable_linux_headless.x86_64.zip
+          rm godot.zip
 
-      # Прописываем редактору внутренние пути до Android SDK, чтобы он не ругался
       - name: Configure Godot Editor Settings for Android
         run: |
           mkdir -p ~/.config/godot
@@ -49,7 +48,6 @@ jobs:
           echo "export/android/android_sdk_path = \"$ANDROID_HOME\"" >> ~/.config/godot/editor_settings-4.tres
           echo "export/android/shutdown_adb_on_exit = true" >> ~/.config/godot/editor_settings-4.tres
 
-      # Фикс ошибки пустого или битого файла иконки res://icon.svg
       - name: Generate Dummy Icon
         run: |
           if [ ! -f icon.svg ]; then
@@ -59,7 +57,6 @@ jobs:
       - name: Build Android APK
         run: |
           mkdir -p build/android
-          # Передаем переменные SDK прямо в команду сборки
           godot --headless --export-debug "Android" build/android/skywhy_crestik.apk
 
       - name: Upload Finished APK
