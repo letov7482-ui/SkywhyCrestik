@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 1. Ставим .NET SDK для компиляции C#
+      # 1. Настраиваем .NET SDK для компиляции C# скриптов
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 4. Скачиваем Godot 4.3 .NET и шаблоны экспорта
+      # 4. Скачиваем официальный Godot 4.3 .NET и шаблоны экспорта
       - name: Setup Godot Engine & Templates
         uses: chickensoft-games/setup-godot@v2
         with:
@@ -47,21 +47,26 @@ jobs:
           echo "export/android/android_sdk_path = \"$ANDROID_HOME\"" >> ~/.config/godot/editor_settings-4.tres
           echo "export/android/shutdown_adb_on_exit = true" >> ~/.config/godot/editor_settings-4.tres
 
-      # 6. Создаем заглушку иконки, если её нет
+      # 6. Генерируем заглушку иконки, чтобы ресурсы импортировались корректно
       - name: Generate Dummy Icon
         run: |
           if [ ! -f icon.svg ]; then
             echo '<svg xmlns="http://w3.org" width="128" height="128"><rect width="128" height="128" fill="#ff0000"/></svg>' > icon.svg
           fi
 
-      # 7. Генерация дебажного ключа подписи Keystore и сборка APK
+      # 7. ВАЖНЫЙ ФИКС: Принудительно компилируем C# код проекта перед сборкой APK
+      - name: Build .NET Project Assemblies
+        run: |
+          dotnet build "skywhy crestik.csproj" -c Release
+
+      # 8. Генерация ключа подписи и запуск итогового экспорта игры в APK
       - name: Build Android APK
         run: |
           keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 365
           mkdir -p build/android
           godot --headless --export-debug "Android" build/android/skywhy_crestik.apk
 
-      # 8. Выкладываем готовый подписанный файл
+      # 9. Выкладываем готовый подписанный файл со всеми встроенными скриптами
       - name: Upload Finished APK
         uses: actions/upload-artifact@v4
         with:
