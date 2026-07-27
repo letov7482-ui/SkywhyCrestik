@@ -1,0 +1,41 @@
+name: "Build skywhy crestik"
+
+on:
+  push:
+    branches: [ "main" ] # Сборка запускается автоматически при каждом пуше в ветку main
+  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой на сайте GitHub
+
+jobs:
+  export-android:
+    name: Android Export
+    runs-on: ubuntu-latest
+    
+    # Использование готового Docker-контейнера с предустановленным движком Godot 4.3.0 stable и .NET (C#)
+    container:
+      image: barichello/godot-ci:4.3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configure Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          cp -r /root/.local/share/godot/templates/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+
+      - name: Build Android APK
+        run: |
+          mkdir -p build/android
+          # Сборка в headless-режиме (без графического интерфейса на сервере)
+          godot --headless --export-debug "Android" build/android/skywhy_crestik.apk
+
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: skywhy-crestik-apk
+          path: build/android/skywhy_crestik.apk
+          retention-days: 7 # Файл будет храниться на GitHub 7 дней
+          
