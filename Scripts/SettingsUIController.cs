@@ -12,50 +12,42 @@ public partial class SettingsUIController : Control
 
     public override void _Ready()
     {
-        // Ищем наш менеджер настроек в проекте
-        settingsManager = GetNode<SettingsManager>("/root/SettingsManager");
+        // Безопасный поиск менеджера настроек в дереве сцены Godot
+        settingsManager = GetNodeOrNull<SettingsManager>("/root/SettingsManager");
 
-        // Связываем элементы интерфейса
+        // Связываем элементы интерфейса экрана смартфона
         fpsLabel = GetNode<Label>("Panel/VBox/FPSLabel");
         fpsSlider = GetNode<Slider>("Panel/VBox/FPSSlider");
         soundSlider = GetNode<Slider>("Panel/VBox/SoundSlider");
         musicSlider = GetNode<Slider>("Panel/VBox/MusicSlider");
 
-        // Подключаем события изменения ползунков
-        fpsSlider.ValueChanged += OnFPSChanged;
-        soundSlider.ValueChanged += (val) => OnVolumeChanged("SFX", (float)val);
-        musicSlider.ValueChanged += (val) => OnVolumeChanged("Music", (float)val);
+        // Подключаем события изменения ползунков на экране Android
+        if (fpsSlider != null) fpsSlider.ValueChanged += OnFPSChanged;
     }
 
     private void OnFPSChanged(double value)
     {
         int fpsTarget = (int)value;
-        fpsLabel.Text = $"Лимит кадров (FPS): {fpsTarget}";
+        if (fpsLabel != null) fpsLabel.Text = $"Лимит кадров (FPS): {fpsTarget}";
         
-        // Отправляем значение в менеджер, который проверит перегрев устройства
-        settingsManager.SetGameFPS(fpsTarget);
-    }
-
-    private void OnVolumeChanged(string busName, float value)
-    {
-        settingsManager.SetVolume(busName, value);
+        // Отправляем значение в менеджер для проверки перегрева Redmi
+        if (settingsManager != null) settingsManager.SetGameFPS(fpsTarget);
     }
 
     public void OnLowGraphicsPressed()
     {
-        settingsManager.ChangeGraphicsQuality(0); // Низкая графика
+        if (settingsManager != null) settingsManager.ChangeGraphicsQuality(0); // Низкая графика
         GD.Print("Игрок выбрал экономичный режим.");
     }
 
     public void OnUltraGraphicsPressed()
     {
-        settingsManager.ChangeGraphicsQuality(2); // Красивая графика
+        if (settingsManager != null) settingsManager.ChangeGraphicsQuality(2); // Красивая графика
         GD.Print("Игрок включил ультра-графику.");
     }
 
     public void OnCloseSettingsPressed()
     {
-        // Скрываем меню настроек и возвращаемся в игру
-        Visible = false;
+        Visible = false; // Закрываем окно настроек
     }
 }
