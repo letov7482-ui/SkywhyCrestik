@@ -2,7 +2,10 @@ name: Build and Package SkyWhy Game
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master" ] # Запускается при пуше в ветку main или master
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -15,7 +18,7 @@ jobs:
     - name: Set up Node.js environment
       uses: actions/setup-node@v4
       with:
-        node-node-version: 20
+        node-version: 20
         cache: 'npm'
 
     - name: Install game production dependencies
