@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Подключаем загрузчик 3D моделей
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MapBuilder } from './world/MapBuilder.js';
 import { MonsterAI } from './ai/MonsterAI.js';
 import { CaseSystem } from './shop/CaseSystem.js';
@@ -18,7 +18,6 @@ let touchStartX = 0;
 window.flashlightBattery = 100.0;
 let isFlashlightOn = true;
 
-// Создаем загрузчик моделей
 const gltfLoader = new GLTFLoader();
 
 function initGame() {
@@ -39,22 +38,16 @@ function initGame() {
     const spawns = mapBuilder.getSpawnPoints();
     camera.position.copy(spawns.player);
 
-    // 1. ЗАГРУЗКА НАСТОЯЩЕЙ 3D-МОДЕЛИ МОНСТРА
-    // Заранее настраиваем путь к модели monster.gltf в папке assets
+    // Загрузка модели с автоматическим резервным кубом (если файла .gltf еще нет)
     gltfLoader.load('./assets/models/monster.gltf', (gltf) => {
         monsterMesh = gltf.scene;
         monsterMesh.position.copy(spawns.monster);
-        
-        // Подгоняем масштаб модели под наш лабиринт
         monsterMesh.scale.set(1.5, 1.5, 1.5); 
         scene.add(monsterMesh);
-        
-        // Передаем настоящую модель в интеллект ИИ
         monsterAI = new MonsterAI(monsterMesh);
-    }, undefined, (error) => {
-        console.log("Модель монстра пока не загружена в ассеты, используется временный куб");
-        // Резервный куб на случай, если файла еще нет в репозитории
-        const mGeo = new THREE.BoxGeometry(0.8, 2.2, 0.8);
+    }, undefined, () => {
+        // Резервный куб монстра, чтобы игра запустилась без ассетов
+        const mGeo = new THREE.BoxGeometry(1.2, 2.2, 1.2);
         const mMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         monsterMesh = new THREE.Mesh(mGeo, mMat);
         monsterMesh.position.copy(spawns.monster);
@@ -62,14 +55,12 @@ function initGame() {
         monsterAI = new MonsterAI(monsterMesh);
     });
 
-    // Освещение фонарика
     const light = new THREE.SpotLight(0xffffff, 4, 35, Math.PI / 5, 0.5, 1);
     camera.add(light);
     camera.add(light.target);
     light.target.position.set(0, 0, -1);
     scene.add(camera);
 
-    // Инициализация меню (передаем null вместо старого playerModel для кастомизации)
     mainMenu = new MainMenu(() => {
         isPlaying = true;
     }, null, caseSystem);
@@ -132,7 +123,7 @@ function initMobileControls() {
             if (!isPlaying) return;
             AudioSystem.playClick();
             isFlashlightOn = !isFlashlightOn;
-            camera.children[0].visible = isFlashlightOn;
+            camera.children[0].visible = isFlashlightOn; // Переключаем SpotLight фонарика
         };
     }
 }
