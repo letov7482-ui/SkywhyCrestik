@@ -1,0 +1,89 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/Player.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/MonsterAI.gd" id="2_monster"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(60, 1, 60)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(4, 5, 4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+size = Vector3(4, 5, 4)
+
+[node name="World" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.0174524, 0.999848, 0, -0.999848, -0.0174524, 0, 15, 0)
+light_energy = 0.05
+light_color = Color(0.1, 0.1, 0.15, 1)
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+
+[node name="StaticBody3D_Floor" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D_Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/StaticBody3D_Floor"]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="HorrorWall_1" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.5, -12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/HorrorWall_1"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/HorrorWall_1"]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="HorrorWall_2" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 2.5, -12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/HorrorWall_2"]
+shape = SubResource("BoxShape3D_wall")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/HorrorWall_2"]
+mesh = SubResource("BoxMesh_wall")
+
+[node name="RedEmergencyLight" type="PointLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, -15)
+light_color = Color(1, 0, 0, 1)
+light_energy = 2.0
+omni_range = 15.0
+
+[node name="Player" type="CharacterBody3D" parent="." groups=["Player"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 4)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_wall")
+
+[node name="Head" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/Head"]
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Player/Head/Camera3D"]
+light_energy = 3.5
+spot_range = 25.0
+spot_angle = 35.0
+
+[node name="Monster" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -22)
+script = ExtResource("2_monster")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Monster"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_wall")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Monster"]
+
+[node name="StateTimer" type="Timer" parent="Monster"]
+autostart = true
