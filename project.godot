@@ -1,0 +1,25 @@
+config_version=5
+
+[application]
+config/name="skywhy crestik"
+run/main_scene="res://Scenes/Intro.tscn"
+config/features=PackedStringArray("4.3", "C#", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+window/handheld/orientation=1
+
+[dotnet]
+project/assembly_name="skywhy crestik"
+
+[input_devices]
+pointing/emulate_touch_from_mouse=true
+
+[rendering]
+textures/vram_compression/import_etc2_astc=true
+renderer/rendering_method="mobile"
