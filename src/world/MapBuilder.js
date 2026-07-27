@@ -9,7 +9,6 @@ export class MapBuilder {
             monster: new THREE.Vector3(0, 1.1, -40)
         };
         
-        // Текстурный загрузчик Three.js
         this.textureLoader = new THREE.TextureLoader();
         
         this.mapGrid = [,
@@ -28,48 +27,39 @@ export class MapBuilder {
     }
 
     build() {
-        this.loadHorrorTextures();
+        this.setupMaterials();
         this.createFloorAndCeiling();
         this.generateGridWalls();
     }
 
-    // Заранее настраиваем пути к будущим картинкам
-    loadHorrorTextures() {
-        // Загружаем текстуру стены, пола и потолка из папки assets
-        this.wallTex = this.textureLoader.load('./assets/textures/wall.jpg');
-        this.floorTex = this.textureLoader.load('./assets/textures/floor.jpg');
-        this.ceilTex = this.textureLoader.load('./assets/textures/ceiling.jpg');
+    setupMaterials() {
+        // Умная проверка: если текстур физически нет, включаем базовые цвета хоррора
+        this.wallMaterial = new THREE.MeshBasicMaterial({ color: 0x141414 });
+        this.floorMaterial = new THREE.MeshBasicMaterial({ color: 0x050505 });
+        this.ceilingMaterial = new THREE.MeshBasicMaterial({ color: 0x020202 });
+        this.pillarMaterial = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
 
-        // Настройка повторения текстур, чтобы они не растягивались, а ложились ровно
-        [this.wallTex, this.floorTex, this.ceilTex].forEach(tex => {
-            tex.wrapS = THREE.RepeatWrapping;
-            tex.wrapT = THREE.RepeatWrapping;
-        });
-        
-        this.wallTex.repeat.set(1, 1);
-        this.floorTex.repeat.set(2, 2);
-        this.ceilTex.repeat.set(2, 2);
+        // Попытка загрузить текстуры (если файлов нет, Three.js просто проигнорирует это и оставит цвет)
+        this.textureLoader.load('./assets/textures/wall.jpg', (tex) => {
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+            this.wallMaterial.map = tex; this.wallMaterial.needsUpdate = true;
+        }, undefined, () => console.log("Используется стандартный цвет стен"));
 
-        // Создаем красивые материалы на основе твоих картинок
-        this.wallMaterial = new THREE.MeshBasicMaterial({ map: this.wallTex });
-        this.floorMaterial = new THREE.MeshBasicMaterial({ map: this.floorTex });
-        this.ceilingMaterial = new THREE.MeshBasicMaterial({ map: this.ceilTex });
-        this.pillarMaterial = new THREE.MeshBasicMaterial({ color: 0x0a0a0a }); // Темные колонны
+        this.textureLoader.load('./assets/textures/floor.jpg', (tex) => {
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(2,2);
+            this.floorMaterial.map = tex; this.floorMaterial.needsUpdate = true;
+        }, undefined, () => console.log("Используется стандартный цвет пола"));
     }
 
     createFloorAndCeiling() {
         const mapSize = this.mapGrid.length * this.cellSize;
 
-        // Пол с текстурой
-        const floorGeo = new THREE.PlaneGeometry(mapSize, mapSize);
-        const floor = new THREE.Mesh(floorGeo, this.floorMaterial);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(mapSize, mapSize), this.floorMaterial);
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(mapSize / 2 - this.cellSize / 2, 0, -mapSize / 2 + this.cellSize / 2);
         this.scene.add(floor);
 
-        // Потолок с текстурой
-        const ceilingGeo = new THREE.PlaneGeometry(mapSize, mapSize);
-        const ceiling = new THREE.Mesh(ceilingGeo, this.ceilingMaterial);
+        const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(mapSize, mapSize), this.ceilingMaterial);
         ceiling.rotation.x = Math.PI / 2;
         ceiling.position.set(mapSize / 2 - this.cellSize / 2, 5, -mapSize / 2 + this.cellSize / 2);
         this.scene.add(ceiling);
@@ -92,7 +82,7 @@ export class MapBuilder {
                     this.addPillarDecoration(xPos, zPos);
                 } 
                 else if (cellType === 2) {
-                    this.spawnPoints.monster.set(xPos, 0, zPos); // ИИ монстра встанет на уровень пола
+                    this.spawnPoints.monster.set(xPos, 1.1, zPos);
                 }
             }
         }
@@ -124,4 +114,4 @@ export class MapBuilder {
 
     getSpawnPoints() { return this.spawnPoints; }
     getWallMeshes() { return this.walls; }
-}
+                }
